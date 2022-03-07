@@ -1,3 +1,7 @@
+# test files and executables
+test.c
+game
+
 # Prerequisites
 *.d
 
