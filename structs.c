@@ -6,6 +6,13 @@ struct member{
     int def;
     int dex;
     int crit;
+    int cost;
+};
+
+struct menu_item{
+    struct member m;
+    char *title;
+    int title_select;
 };
 
 struct team{
@@ -14,6 +21,5 @@ struct team{
     // more for stats/logs 
 };
 
-struct map{
-    struct member *map;
-};
+struct member *letter_map;
+// struct member *map;

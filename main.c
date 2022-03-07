@@ -5,13 +5,50 @@
 #include <string.h>
 #include <termios.h>
 #include <sys/ioctl.h>
+#include <sys/time.h>
 
+// #include "structs.c"
 #include "menu.c"
 
 #define CLEAR printf("\033[2J\033[H")
 
-void create_display(){
-    printf("team");
+int random(int max){
+    struct timeval time;
+
+    //get time as microseconds since unix epoch
+    gettimeofday(&time, NULL);
+
+    return (int)time.tv_usec % max;
+}
+
+int random_range(int min, int max){
+    struct timeval time;
+
+    //get time as microseconds since unix epoch
+    gettimeofday(&time, NULL);
+
+    // datetime modulo delta range added to min
+    // leaves negative modulo unhandled
+    return (min + (int)time.tv_usec % (max - min + 1));
+}
+
+void generate_map(){
+    int i = '0';
+    int index = 0;
+    while(i < '}'){
+        struct member new;
+
+        int strength_roll = random(10);
+
+        new.name = i;
+        new.cost = strength_roll;
+        new.atk = (int)(strength_roll*(random(100)*0.01)); // multiply by decimal
+        new.def = (int)(strength_roll*(random(100)*0.01));
+        new.dex = (int)(strength_roll*(random(100)*0.01));
+        new.crit = (int)(strength_roll*(random(100)*0.01));
+
+        letter_map[index] = new;
+    }
 }
 
 struct termios orig_term_attr;
@@ -50,6 +87,8 @@ int main(){
         // i++;
         // // sleep(1);
 
+        // move into a new file or at least function
+
         read(0, &c, 1);// printf("%d\n", c);
         if(c == 13){
             continue;
@@ -59,12 +98,21 @@ int main(){
         }
         if(c == 67){
             select++;
-            c++;
+            c = 0;
+        }
+        if(c == 68){
+            select--;
+            c = 0;
+        }
+        if(c == 116){
+            c = (int)(random(10)*(random(100)*0.01));
         }
         usleep(100);
         // printf("\r%c", c);
 
-        display_menu(c, select%4);
+        // display_menu(c, select%4);
+        
+        display_menu(c, -1);
 
         old_c = c;
     }
