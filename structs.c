@@ -11,8 +11,8 @@ struct member{
 
 struct menu_item{
     struct member m;
-    char *title;
-    int title_select;
+    char title[1024];
+    char title_select[1024];
 };
 
 struct team{
@@ -21,5 +21,4 @@ struct team{
     // more for stats/logs 
 };
 
-struct member *letter_map;
 // struct member *map;

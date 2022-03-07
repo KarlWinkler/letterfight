@@ -10,14 +10,14 @@
 // #include "structs.c"
 #include "menu.c"
 
-#define CLEAR printf("\033[2J\033[H")
+struct member letter_map[ITEMS_LEN];
 
 int random(int max){
     struct timeval time;
 
     //get time as microseconds since unix epoch
     gettimeofday(&time, NULL);
-
+    usleep(23);
     return (int)time.tv_usec % max;
 }
 
@@ -29,7 +29,11 @@ int random_range(int min, int max){
 
     // datetime modulo delta range added to min
     // leaves negative modulo unhandled
+    usleep(23);
     return (min + (int)time.tv_usec % (max - min + 1));
+
+    
+    
 }
 
 void generate_map(){
@@ -42,12 +46,15 @@ void generate_map(){
 
         new.name = i;
         new.cost = strength_roll;
-        new.atk = (int)(strength_roll*(random(100)*0.01)); // multiply by decimal
-        new.def = (int)(strength_roll*(random(100)*0.01));
-        new.dex = (int)(strength_roll*(random(100)*0.01));
-        new.crit = (int)(strength_roll*(random(100)*0.01));
+        new.atk = (int)(strength_roll*(random(100)*0.01) + 1); // multiply by decimal
+        new.def = (int)(strength_roll*(random(100)*0.01) + 1);
+        new.dex = (int)(strength_roll*(random(100)*0.01) + 1);
+        new.crit = (int)(strength_roll*(random(100)*0.01) + 1);
 
         letter_map[index] = new;
+         
+        i++;
+        index++;
     }
 }
 
@@ -55,6 +62,8 @@ struct termios orig_term_attr;
 struct termios new_term_attr;
 
 int main(){
+    // srand();
+
     CLEAR;
     printf("\e[?25l"); // https://stackoverflow.com/questions/30126490/how-to-hide-console-cursor-in-c
 
@@ -74,6 +83,10 @@ int main(){
 
     tcsetattr(fileno(stdin), TCSANOW, &new_term_attr);
     // int i = 0;
+
+    generate_map();
+    CLEAR;
+
     while(1){
 
         int select;
@@ -89,7 +102,13 @@ int main(){
 
         // move into a new file or at least function
 
-        read(0, &c, 1);// printf("%d\n", c);
+        
+        while(c == old_c){
+             read(0, &c, 1);// printf("%d\n", c);
+        }
+
+        old_c = c; 
+
         if(c == 13){
             continue;
         }
@@ -98,23 +117,22 @@ int main(){
         }
         if(c == 67){
             select++;
-            c = 0;
+            // c = 0;
         }
         if(c == 68){
             select--;
-            c = 0;
+            // c = 0;
         }
         if(c == 116){
             c = (int)(random(10)*(random(100)*0.01));
         }
-        usleep(100);
+        usleep(10);
         // printf("\r%c", c);
 
-        // display_menu(c, select%4);
+        display_menu(c, select%20, letter_map);
         
-        display_menu(c, -1);
+        // display_menu(c, -1, letter_map);
 
-        old_c = c;
     }
 
     // CLEAR;
