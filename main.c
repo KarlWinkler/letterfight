@@ -87,13 +87,18 @@ int main(){
     generate_map();
     CLEAR;
 
+    int select = 0;
+    int team_sel = 0;
+    char c = 0;
+    char old_c = 1;
+
     while(1){
 
-        int select;
+
+        // const int modulo_var = 20;
         
         // int a;
-        char c;
-        char old_c;
+
         // a = fgetc(stdin);
         // display_menu(a);
         // // printf("%s", c);
@@ -105,6 +110,7 @@ int main(){
         
         while(c == old_c){
              read(0, &c, 1);// printf("%d\n", c);
+             usleep(100);
         }
 
         old_c = c; 
@@ -115,21 +121,35 @@ int main(){
         if(c == '`'){
             break;
         }
+        // if(c == 65){
+        //     team_sel++;
+        //     // c = 0;
+        // }
+        // if(c == 66){
+        //     team_sel++;
+        //     // c = 0;
+        // }
         if(c == 67){
             select++;
             // c = 0;
         }
         if(c == 68){
-            select--;
+            if(select > 0){
+                select--;            
+            }
+            else{
+                select = 19;
+            }
             // c = 0;
         }
-        if(c == 116){
-            c = (int)(random(10)*(random(100)*0.01));
+        if(c == 112){
+            add_to_team(select % 20, letter_map);
         }
+
         usleep(10);
         // printf("\r%c", c);
 
-        display_menu(c, select%20, letter_map);
+        display_menu(c, select % 20, letter_map);
         
         // display_menu(c, -1, letter_map);
 

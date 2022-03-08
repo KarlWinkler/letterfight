@@ -16,8 +16,12 @@ struct menu_item{
 };
 
 struct team{
-    struct member *members;
+    struct member members[24];
+    int num_members;
     int health;
+    int total_cost;
+    
+    // more for bonuses
     // more for stats/logs 
 };
 
