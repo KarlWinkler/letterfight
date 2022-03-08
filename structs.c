@@ -19,8 +19,15 @@ struct team{
     struct member members[24];
     int num_members;
     int health;
+    int balance;
+
+    // used to display power of team
     int total_cost;
-    
+    // power stats
+    float offence;
+    float defence;
+    float dexterity;
+    float crit;
     // more for bonuses
     // more for stats/logs 
 };

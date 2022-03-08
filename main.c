@@ -93,6 +93,7 @@ int main(){
     int team_sel = 0;
     char c = 0;
     char old_c = 1;
+    team_init();
 
     while(1){
 
