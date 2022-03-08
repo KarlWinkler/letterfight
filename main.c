@@ -13,6 +13,10 @@
 #define MAX_TO_SCREEN 20
 
 struct member letter_map[ITEMS_LEN];
+int select = 0;
+int team_sel = 0;
+char c = 0;
+char old_c = 1;
 
 int random(int max){
     struct timeval time;
@@ -39,9 +43,9 @@ int random_range(int min, int max){
 }
 
 void generate_map(){
-    int i = '0';
+    int i = FIRST;
     int index = 0;
-    while(i < '}'){
+    while(i < LAST){
         struct member new;
 
         int strength_roll = random(10);
@@ -58,6 +62,48 @@ void generate_map(){
         i++;
         index++;
     }
+}
+
+int handel_key_press(int c){
+    if(c == 13){
+        return 0;
+    }
+    if(c == '`'){
+        return 1;
+    }
+
+    // arrow keys
+    if(c == 65){ // increase team_select
+        team_sel++;
+    }
+    if(c == 66){ // decrement team_select
+        if(team_sel > 0){
+            team_sel--;                
+        }
+        else{
+            team_sel = MAX_MEMBERS - 1;
+        }
+    }
+    if(c == 67){ // increment select
+        select++;
+    }
+    if(c == 68){ // decrement select
+        if(select > 0){
+            select--;            
+        }
+        else{
+            select = MAX_TO_SCREEN - 1;
+        }
+    }
+    if(c == 112){ // p buys
+        add_to_team(select % MAX_TO_SCREEN, items);
+        c = 0;
+    }
+    if(c == 100){ // d sells
+        delete_from_team(team_sel % MAX_MEMBERS);
+        c = 0;
+    }
+    return 0;
 }
 
 struct termios orig_term_attr;
@@ -87,28 +133,11 @@ int main(){
     // int i = 0;
 
     generate_map();
+    build_items(letter_map);
     CLEAR;
-
-    int select = 0;
-    int team_sel = 0;
-    char c = 0;
-    char old_c = 1;
     team_init();
 
     while(1){
-
-
-        // const int modulo_var = 20;
-        
-        // int a;
-
-        // a = fgetc(stdin);
-        // display_menu(a);
-        // // printf("%s", c);
-        // i++;
-        // // sleep(1);
-
-        // move into a new file or at least function
 
         
         while(c == old_c){
@@ -118,47 +147,14 @@ int main(){
 
         old_c = c; 
 
-        if(c == 13){
-            continue;
-        }
-        if(c == '`'){
+        if(handel_key_press(c)){
             break;
-        }
-
-        // arrow keys
-        if(c == 65){ // increase team_select
-            team_sel++;
-        }
-        if(c == 66){ // decrement team_select
-            if(team_sel > 0){
-                team_sel--;                
-            }
-            else{
-                team_sel = MAX_MEMBERS - 1;
-            }
-        }
-        if(c == 67){ // increment select
-            select++;
-        }
-        if(c == 68){ // decrement select
-            if(select > 0){
-                select--;            
-            }
-            else{
-                select = MAX_TO_SCREEN - 1;
-            }
-        }
-        if(c == 112){ // p adds 
-            add_to_team(select % MAX_TO_SCREEN, letter_map);
-        }
-        if(c == 100){ // d deletes
-            delete_from_team(team_sel % MAX_MEMBERS);
         }
 
         usleep(10);
         // printf("\r%c", c);
 
-        display_menu(c, select % MAX_TO_SCREEN, team_sel % MAX_MEMBERS, letter_map);
+        display_buy_menu(c, select % MAX_TO_SCREEN, team_sel % MAX_MEMBERS, letter_map);
         
         // display_menu(c, -1, letter_map);
 

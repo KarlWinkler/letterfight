@@ -6,14 +6,11 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 
-#include "structs.c"
-
-#define ITEMS_LEN '}' - '0'
-#define CLEAR printf("\033[2J\033[H")
-#define MAX_MEMBERS 5
+#include "team.c"
 
 struct menu_item items[ITEMS_LEN];
-struct team my_team;
+// struct menu_item transact[MAX_MEMBERS];
+// int trans_size = 0;
 
 
 void build_items(struct member *letter_map){
@@ -26,6 +23,8 @@ void build_items(struct member *letter_map){
 
         n[0] = letter_map[i].name;
         n[1] = '\0';
+
+        // normal
         
         strcat(temp, " ");
         strcat(temp, n);
@@ -35,6 +34,8 @@ void build_items(struct member *letter_map){
 
         bzero(temp, sizeof(temp));
 
+        // select
+
         strcat(temp, "\033[44m ");
         strcat(temp, n);
         strcat(temp, " \t\033[47m");
@@ -42,72 +43,33 @@ void build_items(struct member *letter_map){
         strcpy(items[i].title_select, temp);
         
         bzero(temp, sizeof(temp));
+
+        //bought
+
+        strcat(temp, "\033[40m\033[37m ");
+        strcat(temp, n);
+        strcat(temp, " \t\033[47m\033[30m");
+
+        strcpy(items[i].disabled, temp);
+        
+        bzero(temp, sizeof(temp));
+
+        // bought selected
+
+        strcat(temp, "\033[40m\033[31m ");
+        strcat(temp, n);
+        strcat(temp, " \t\033[47m\033[30m");
+
+        strcpy(items[i].disabled_selected, temp);
+        
+        bzero(temp, sizeof(temp));
+
+        items[i].bought = 0;
     }
 
 }
 
-void team_init(){
-    my_team.total_cost = 0;
-    my_team.offence = 0;
-    my_team.defence = 0.0f;
-    my_team.dexterity = 0;
-    my_team.crit = 0;
-    my_team.health = 0;
-    my_team.num_members = 0;
-}
-
-void add_to_team(int select, const struct member *letter_map){
-
-    if(my_team.num_members < MAX_MEMBERS){
-        my_team.members[my_team.num_members] = letter_map[select];
-        my_team.num_members ++;
-        if(my_team.num_members == 1){
-            my_team.total_cost = 0;
-        }
-        my_team.total_cost += letter_map[select].cost;
-
-
-    }
-}
-
-void delete_from_team(int team_select){
-    if(team_select >= my_team.num_members){
-        return;
-    }
-
-    // remove cost
-    my_team.total_cost -= my_team.members[team_select].cost;
-
-    for(int i = team_select; i < my_team.num_members; i++){
-        my_team.members[i] = my_team.members[i+1];
-    }
-    my_team.num_members --;
-}
-
-void calc_team_power(){
-
-    my_team.offence = 0;
-    my_team.defence = 0;
-    my_team.dexterity = 0;
-    my_team.crit = 0;
-
-    for(int i = 0; i < my_team.num_members; i++){
-        my_team.offence += my_team.members[i].atk;
-        my_team.defence += my_team.members[i].def;
-        my_team.dexterity += my_team.members[i].dex;
-        my_team.crit += my_team.members[i].crit;
-    }
-
-    my_team.offence = my_team.offence / my_team.total_cost;
-    my_team.defence = my_team.defence / my_team.total_cost;
-    my_team.dexterity = my_team.dexterity / my_team.total_cost;
-    my_team.crit = my_team.crit / my_team.total_cost;
-
-}
-
-void display_menu(int str, int select, int team_select, struct member *letter_map){
-
-    build_items(letter_map);
+void display_buy_menu(int str, int select, int team_select, struct member *letter_map){
 
     // char *option_a = " a \t";
     // char *option_b = " b \t";
@@ -133,8 +95,14 @@ void display_menu(int str, int select, int team_select, struct member *letter_ma
     strcat(out, "\r\033[47m\033[30m");   
 
     for(int i = 0; i < 20; i++){
-        
-        if(i == select){
+
+        if(items[i].bought == 1 && i == select){
+            strcat(out, items[i].disabled_selected);
+        }
+        else if(items[i].bought == 1){
+            strcat(out, items[i].disabled);
+        }
+        else if(i == select){
             strcat(out, items[i].title_select);
         }
         else{
@@ -179,6 +147,8 @@ void display_menu(int str, int select, int team_select, struct member *letter_ma
     printf("\ncost: %d\n\nattack: %d\ndeffence: %d\ndexterity: %d\ncrit chance: %d\n\nMy Team:\n%s\n", items[select].m.cost, items[select].m.atk, items[select].m.def, items[select].m.dex, items[select].m.crit, team_out);
     printf("Cost: %d\n", my_team.total_cost);
     printf("Offence: %f\nDefence: %f\nDexterity: %f\nCritical Strike: %f\n", my_team.offence, my_team.defence, my_team.dexterity, my_team.crit);
+
+    // printf("Bought: %d\n", items[select].bought);
 
     
     bzero(out, sizeof(out));

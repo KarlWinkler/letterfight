@@ -13,6 +13,9 @@ struct menu_item{
     struct member m;
     char title[1024];
     char title_select[1024];
+    char disabled[1024];
+    char disabled_selected[1024];
+    int bought;
 };
 
 struct team{
