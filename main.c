@@ -10,6 +10,8 @@
 // #include "structs.c"
 #include "menu.c"
 
+#define MAX_TO_SCREEN 20
+
 struct member letter_map[ITEMS_LEN];
 
 int random(int max){
@@ -121,35 +123,41 @@ int main(){
         if(c == '`'){
             break;
         }
-        // if(c == 65){
-        //     team_sel++;
-        //     // c = 0;
-        // }
-        // if(c == 66){
-        //     team_sel++;
-        //     // c = 0;
-        // }
-        if(c == 67){
-            select++;
-            // c = 0;
+
+        // arrow keys
+        if(c == 65){ // increase team_select
+            team_sel++;
         }
-        if(c == 68){
+        if(c == 66){ // decrement team_select
+            if(team_sel > 0){
+                team_sel--;                
+            }
+            else{
+                team_sel = MAX_MEMBERS - 1;
+            }
+        }
+        if(c == 67){ // increment select
+            select++;
+        }
+        if(c == 68){ // decrement select
             if(select > 0){
                 select--;            
             }
             else{
-                select = 19;
+                select = MAX_TO_SCREEN - 1;
             }
-            // c = 0;
         }
-        if(c == 112){
-            add_to_team(select % 20, letter_map);
+        if(c == 112){ // p adds 
+            add_to_team(select % MAX_TO_SCREEN, letter_map);
+        }
+        if(c == 100){ // d deletes
+            delete_from_team(team_sel % MAX_MEMBERS);
         }
 
         usleep(10);
         // printf("\r%c", c);
 
-        display_menu(c, select % 20, letter_map);
+        display_menu(c, select % MAX_TO_SCREEN, team_sel % MAX_MEMBERS, letter_map);
         
         // display_menu(c, -1, letter_map);
 

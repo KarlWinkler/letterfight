@@ -54,7 +54,17 @@ void add_to_team(int select, const struct member *letter_map){
     }
 }
 
-void display_menu(int str, int select, struct member *letter_map){
+void delete_from_team(int team_select){
+    if(team_select > my_team.num_members){
+        return;
+    }
+    for(int i = team_select; i < my_team.num_members; i++){
+        my_team.members[i] = my_team.members[i+1];
+    }
+    my_team.num_members --;
+}
+
+void display_menu(int str, int select, int team_select, struct member *letter_map){
 
     build_items(letter_map);
 
@@ -100,18 +110,22 @@ void display_menu(int str, int select, struct member *letter_map){
             n[0] = my_team.members[i].name;
             n[1] = '\0';
 
-            // if(i == team_select){
-            //     strcat(team_out, "\033[30m\033[44m ");
-            // }
-            // else{
-            //     strcat(team_out, "\033[30m\033[47m ");
-            // }
-            strcat(team_out, "\033[30m\033[47m ");
+            if(i == team_select){
+                strcat(team_out, "\033[30m\033[44m ");
+            }
+            else{
+                strcat(team_out, "\033[30m\033[47m ");
+            }
             strcat(team_out, n);
             strcat(team_out, " \033[0m ");
         }
         else{
-            strcat(team_out, "'' ");
+            if(i == team_select){
+                strcat(team_out, "\033[30m\033[44m''\033[0m ");
+            }
+            else{
+                strcat(team_out, "'' ");
+            }
         }
     }  
 
