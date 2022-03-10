@@ -1,4 +1,8 @@
 // team.c
+//
+// Author: Karl Winkler
+// Date Created: Mar. 6, 2022
+// Last Change: Mar. 8, 2022 (git is correct if different)
 
 struct member{
     char name;
@@ -16,6 +20,14 @@ struct menu_item{
     char disabled[1024];
     char disabled_selected[1024];
     int bought;
+};
+
+struct history_item{
+    struct menu_item *item;
+    struct member mem;
+    int mem_inx;
+    int type; // 0 = buy; 1 = delete; 
+
 };
 
 struct team{

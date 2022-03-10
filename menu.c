@@ -1,4 +1,11 @@
 // menu.c
+//
+// I will change this to buy_menu.c
+// then I will implement the other menus/gamestates 
+//
+// Author: Karl Winkler
+// Date Created: Mar. 6, 2022
+// Last Change: Mar. 8, 2022 (git is correct if different)
 
 #include <stdio.h>
 #include <unistd.h>
@@ -148,7 +155,7 @@ void display_buy_menu(int str, int select, int team_select, struct member *lette
     printf("Cost: %d\n", my_team.total_cost);
     printf("Offence: %f\nDefence: %f\nDexterity: %f\nCritical Strike: %f\n", my_team.offence, my_team.defence, my_team.dexterity, my_team.crit);
 
-    // printf("Bought: %d\n", items[select].bought);
+    printf("Team_select: %d\n", team_select);
 
     
     bzero(out, sizeof(out));

@@ -1,4 +1,12 @@
 // main.c
+//
+// Fight with randomly statted letters, use power-ups to win close fights 
+// and level up your units to dominate your opponents!
+//
+// Author: Karl Winkler
+// Date Created: Mar. 6, 2022
+// Last Change: Mar. 8, 2022 (git is correct if different)
+// github repository: https://github.com/KarlWinkler/letterfight
 
 #include <stdio.h>
 #include <unistd.h>
@@ -12,21 +20,32 @@
 
 #define MAX_TO_SCREEN 20
 
+// variables required in main 
 struct member letter_map[ITEMS_LEN];
-int select = 0;
+int gamestate = 1; // 0 = home; 1 = buy; 2 = fight; 3 = stats?(maybe i will implement this)
+int member_sel = 0;
 int team_sel = 0;
 char c = 0;
 char old_c = 1;
 
+// My random because I was too lazy to figure out the default one
+// and I thought it should be a good experiment to try to make something
+// that is at least somewhat random
+
+// not perfect but it gets the job done
 int random(int max){
     struct timeval time;
 
     //get time as microseconds since unix epoch
     gettimeofday(&time, NULL);
-    usleep(23);
+
+    // to add a small element of randomness so not everything is in order
+    usleep(23); 
+
     return (int)time.tv_usec % max;
 }
 
+// not used yet(maybe later but probably not)
 int random_range(int min, int max){
     struct timeval time;
 
@@ -42,6 +61,8 @@ int random_range(int min, int max){
     
 }
 
+// generates the new members to play the game
+// this is called once at the start of a game
 void generate_map(){
     int i = FIRST;
     int index = 0;
@@ -64,7 +85,10 @@ void generate_map(){
     }
 }
 
-int handel_key_press(int c){
+// takes a char 
+// returns a response code
+// 0 == OK; 1 == exit;
+int handel_key_press(char c){
     if(c == 13){
         return 0;
     }
@@ -73,10 +97,10 @@ int handel_key_press(int c){
     }
 
     // arrow keys
-    if(c == 65){ // increase team_select
+    if(c == 65){ // UP - increase team_select
         team_sel++;
     }
-    if(c == 66){ // decrement team_select
+    if(c == 66){ // DOWN - decrement team_select
         if(team_sel > 0){
             team_sel--;                
         }
@@ -84,40 +108,52 @@ int handel_key_press(int c){
             team_sel = MAX_MEMBERS - 1;
         }
     }
-    if(c == 67){ // increment select
-        select++;
+    if(c == 67){ // RIGHT - increment member_sel
+        member_sel++;
     }
-    if(c == 68){ // decrement select
-        if(select > 0){
-            select--;            
+    if(c == 68){ // LEFT - decrement member_sel
+        if(member_sel > 0){
+            member_sel--;            
         }
         else{
-            select = MAX_TO_SCREEN - 1;
+            member_sel = MAX_TO_SCREEN - 1;
         }
     }
-    if(c == 112){ // p buys
-        add_to_team(select % MAX_TO_SCREEN, items);
-        c = 0;
+    if(c == 'p'){ // purchase
+        add_to_team(&items[member_sel % MAX_TO_SCREEN]);
     }
-    if(c == 100){ // d sells
+    if(c == 'd'){ // delete 
         delete_from_team(team_sel % MAX_MEMBERS);
-        c = 0;
+    }
+    if(c == 'u'){ // undo
+        undo_last();
     }
     return 0;
 }
 
+// iniit gamedata
+void game_init(){
+
+    // generate required data
+    generate_map();
+    build_items(letter_map);
+    team_init();
+}
+
+// stuff for setting terminal to raw mode
 struct termios orig_term_attr;
 struct termios new_term_attr;
 
 int main(){
-    // srand();
 
+    //clear game board and hide cursor
     CLEAR;
     printf("\e[?25l"); // https://stackoverflow.com/questions/30126490/how-to-hide-console-cursor-in-c
 
 
     struct winsize w;
    
+    // raw mode 
     /* from https://github.com/benapetr/snake/blob/master/src/main.c */
     /* more resources at https://viewsourcecode.org/snaptoken/kilo/02.enteringRawMode.html */
     /* set the terminal to raw mode */ 
@@ -128,41 +164,44 @@ int main(){
     new_term_attr.c_cc[VMIN] = 0;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 
-
+    // more raw mode
     tcsetattr(fileno(stdin), TCSANOW, &new_term_attr);
-    // int i = 0;
 
-    generate_map();
-    build_items(letter_map);
+    game_init();
+
+    // clear again just in case
     CLEAR;
-    team_init();
 
     while(1){
 
-        
+        // don't do anything unless the last key pressed changes
+
+        // i deal with duplicate key presses by setting c to 0 
+        // after the user presses it        
         while(c == old_c){
-             read(0, &c, 1);// printf("%d\n", c);
-             usleep(100);
+             read(0, &c, 1); // read user input
+             usleep(100); // so that it is not too memory intensive (still not great I think)
         }
 
-        old_c = c; 
+        old_c = c; // so that above works
 
-        if(handel_key_press(c)){
+        if((c = handel_key_press(c))){ // handel key press 0 == OK; 1 == exit;
             break;
         }
 
-        usleep(10);
-        // printf("\r%c", c);
+        usleep(10); // more sleep to save resources (idk if this one needs to be here)
 
-        display_buy_menu(c, select % MAX_TO_SCREEN, team_sel % MAX_MEMBERS, letter_map);
-        
-        // display_menu(c, -1, letter_map);
+        switch(gamestate){
+            case 1:
+                display_buy_menu(c, member_sel % MAX_TO_SCREEN, team_sel % MAX_MEMBERS, letter_map);
+                break; 
 
+            default:
+                display_buy_menu(c, member_sel % MAX_TO_SCREEN, team_sel % MAX_MEMBERS, letter_map); // change to home later
+        }
     }
-
-    // CLEAR;
-    tcsetattr(fileno(stdin), TCSANOW, &orig_term_attr);
-    printf("\e[?25h\033[0m\n");
+    tcsetattr(fileno(stdin), TCSANOW, &orig_term_attr); // remove raw
+    printf("\e[?25h\033[0m\n"); // give cursor back
 
 }
 
