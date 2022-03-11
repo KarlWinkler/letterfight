@@ -1,0 +1,12 @@
+Buy Menu Hotkeys 
+
+UP => move team select right                DOWN => move team select left       
+LEFT => move member select left             RIGHT => move member select right
+p => purchase member from member list       s => sell member from team list
+u => undo last action (up to UNDO_BUFFER)
+
+Fight Menu Hotkeys
+
+
+
+(b to go back)

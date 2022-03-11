@@ -7,14 +7,8 @@
 // Last Change: Mar. 8, 2022 (git is correct if different)
 
 #include "structs.c"
+#include "macros"
 
-// defines used by anything that uses team.c
-#define FIRST 'a'
-#define LAST 'z'
-#define ITEMS_LEN LAST - FIRST
-#define CLEAR printf("\033[2J\033[H")
-#define MAX_MEMBERS 5
-#define UNDO_BUFFER 20
 
 struct team my_team;
 struct history_item history[UNDO_BUFFER];
@@ -28,7 +22,27 @@ void team_init(){
     my_team.crit = 0;
     my_team.health = 0;
     my_team.num_members = 0;
+    my_team.balance = 0;
 }
+
+void level_up(struct member m){
+    float level = m.level;
+    m.cost += m.cost / level;
+    m.atk += m.atk / level;
+    m.def += m.def / level;
+    m.dex += m.dex / level;
+    m.crit += m.crit / level;
+    m.level++;
+}
+
+int check_duplicate(struct member m, struct member *mem_list, int len){
+    for(int i = 0; i < len; i++){
+        if(m.name == mem_list[i].name){
+            return i;
+        }
+    }
+    return -1;
+}   
 
 void add_to_history(int type, struct member mem, int mem_inx, struct menu_item *item){
 
@@ -52,6 +66,15 @@ void add_to_team(struct menu_item *toAdd){
     }
 
     if(my_team.num_members < MAX_MEMBERS){
+        int inx = 0;
+
+        if(inx = (check_duplicate(toAdd->m, my_team.members, MAX_MEMBERS)) >= 0){
+            level_up(my_team.members[inx]);
+            struct menu_item empty;
+            add_to_history(2, my_team.members[inx], inx, &empty);
+            return;
+        }
+
         my_team.members[my_team.num_members] = (*toAdd).m;
         my_team.num_members ++;
         if(my_team.num_members == 1){
@@ -65,7 +88,7 @@ void add_to_team(struct menu_item *toAdd){
     }
 }
 
-void delete_from_team(int team_select){
+void sell_from_team(int team_select){
     if(team_select >= my_team.num_members){
         return;
     }
@@ -101,6 +124,15 @@ void undo_last(){
         my_team.num_members++;
         my_team.total_cost += h.mem.cost;
         history_index--;
+    }
+    else if(h.type == 2){
+        h.mem.cost -= h.mem.cost / (float)h.mem.level;
+        h.mem.atk -= h.mem.atk / (float)h.mem.level;
+        h.mem.def -= h.mem.def / (float)h.mem.level;
+        h.mem.dex -= h.mem.dex / (float)h.mem.level;
+        h.mem.crit -= h.mem.crit / (float)h.mem.level;
+        h.mem.level--;
+
     }
 }
 

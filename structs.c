@@ -11,6 +11,7 @@ struct member{
     int dex;
     int crit;
     int cost;
+    int level;
 };
 
 struct menu_item{
@@ -26,7 +27,7 @@ struct history_item{
     struct menu_item *item;
     struct member mem;
     int mem_inx;
-    int type; // 0 = buy; 1 = delete; 
+    int type; // 0 = buy; 1 = delete, 2 = level_up; 
 
 };
 

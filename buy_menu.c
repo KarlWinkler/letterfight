@@ -1,19 +1,17 @@
-// menu.c
+// buy_menu.c
 //
-// I will change this to buy_menu.c
-// then I will implement the other menus/gamestates 
+// displays the buy menu based on the current state
 //
 // Author: Karl Winkler
 // Date Created: Mar. 6, 2022
-// Last Change: Mar. 8, 2022 (git is correct if different)
+// Last Change: Mar. 10, 2022 (git is correct if different)
 
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include <termios.h>
-#include <sys/ioctl.h>
 
 #include "team.c"
+#include "macros"
 
 struct menu_item items[ITEMS_LEN];
 // struct menu_item transact[MAX_MEMBERS];
