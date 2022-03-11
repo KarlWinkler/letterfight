@@ -1,3 +1,6 @@
+#ifndef MACROS_H
+#define MACROS_H
+
 // team.c
 #define FIRST 'a'
 #define LAST 'z'
@@ -8,3 +11,5 @@
 
 // main.c
 #define MAX_TO_SCREEN 20
+
+#endif

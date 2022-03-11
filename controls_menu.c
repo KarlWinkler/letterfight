@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "macros"
+#include "macros.h"
 
 void display_controls_menu(){
     CLEAR;

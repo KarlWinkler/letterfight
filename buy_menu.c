@@ -11,7 +11,7 @@
 #include <string.h>
 
 #include "team.c"
-#include "macros"
+#include "macros.h"
 
 struct menu_item items[ITEMS_LEN];
 // struct menu_item transact[MAX_MEMBERS];
@@ -115,7 +115,7 @@ void display_buy_menu(int str, int select, int team_select, struct member *lette
         }
     }
 
-    char team_out[100];
+   char team_out[100];
     for(int i = 0; i < MAX_MEMBERS; i++){
         
         if(i < my_team.num_members){
@@ -141,7 +141,7 @@ void display_buy_menu(int str, int select, int team_select, struct member *lette
                 strcat(team_out, "'' ");
             }
         }
-    }  
+    }   
 
     calc_team_power();
     

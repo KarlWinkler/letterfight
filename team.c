@@ -6,8 +6,8 @@
 // Date Created: Mar. 8, 2022
 // Last Change: Mar. 8, 2022 (git is correct if different)
 
-#include "structs.c"
-#include "macros"
+#include "structs.h"
+#include "macros.h"
 
 
 struct team my_team;
@@ -68,7 +68,7 @@ void add_to_team(struct menu_item *toAdd){
     if(my_team.num_members < MAX_MEMBERS){
         int inx = 0;
 
-        if(inx = (check_duplicate(toAdd->m, my_team.members, MAX_MEMBERS)) >= 0){
+        if((inx = check_duplicate(toAdd->m, my_team.members, my_team.num_members)) >= 0){
             level_up(my_team.members[inx]);
             struct menu_item empty;
             add_to_history(2, my_team.members[inx], inx, &empty);

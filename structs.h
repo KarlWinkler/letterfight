@@ -4,6 +4,9 @@
 // Date Created: Mar. 6, 2022
 // Last Change: Mar. 8, 2022 (git is correct if different)
 
+#ifndef STRUCTS_C
+#define STRUCTS_C
+
 struct member{
     char name;
     int atk;
@@ -48,4 +51,5 @@ struct team{
     // more for stats/logs 
 };
 
+#endif
 // struct member *map;

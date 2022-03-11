@@ -13,13 +13,14 @@
 #include <string.h>
 #include <termios.h>
 #include <sys/ioctl.h>
-#include <sys/time.h>
 
 // #include "structs.c"
 #include "home_menu.c"
 #include "buy_menu.c"
 #include "controls_menu.c"
-#include "macros"
+#include "fight_menu.c"
+#include "random.h"
+#include "macros.h"
 
 // variables required in main 
 struct member letter_map[ITEMS_LEN];
@@ -27,39 +28,10 @@ int gamestate = 0; // 0 = home; 1 = buy; 2 = fight; 3 = controls; 4 = stats?(may
 int last_state = 0;
 int member_sel = 0;
 int team_sel = 0;
+int enemy_select = 0;
+int fight_sel_state = 0;
 char c = 0;
 char old_c = 1;
-
-// My random because I was too lazy to figure out the default one
-// and I thought it should be a good experiment to try to make something
-// that is at least somewhat random
-
-// not perfect but it gets the job done
-int random_int(int max){
-    struct timeval time;
-
-    //get time as microseconds since unix epoch
-    gettimeofday(&time, NULL);
-
-    // to add a small element of randomness so not everything is in order
-    usleep(23); 
-
-    return (int)time.tv_usec % max;
-}
-
-// not used yet(maybe later but probably not)
-int random_range(int min, int max){
-    struct timeval time;
-
-    //get time as microseconds since unix epoch
-    gettimeofday(&time, NULL);
-
-    // datetime modulo delta range added to min
-    // leaves negative modulo unhandled
-    usleep(23);
-    return (min + (int)time.tv_usec % (max - min + 1));
-    
-}
 
 // generates the new members to play the game
 // this is called once at the start of a game
@@ -84,6 +56,12 @@ void generate_map(){
         i++;
         index++;
     }
+}
+
+void new_fight_state(){
+    team_sel = 0;
+    generate_enemy(letter_map);
+
 }
 
 // takes a char 
@@ -112,15 +90,6 @@ int handel_key_press(char c){
             return 0;
         }
     } 
-
-    if(gamestate == 3){
-        if(c == 'b'){
-            gamestate = last_state;
-        }
-        else{
-            return 0;
-        }
-    }
 
     // buy menu hotkeys 
     // UP => move team select rightS
@@ -166,6 +135,75 @@ int handel_key_press(char c){
         if(c == 'c'){
             gamestate = 3;
             last_state = 1;
+        }
+        if(c == 10){ // ENTER moves to fight phase
+            gamestate = 2;
+            new_fight_state();
+        }
+        else{
+            return 0;
+        }
+    }
+
+    if(gamestate == 2){
+        if(fight_sel_state == 0){
+            if(c == 67){ // RIGHT - increment member_sel
+                enemy_select++;
+            }
+            if(c == 68){ // LEFT - decrement member_sel
+                if(enemy_select > 0){
+                    enemy_select--;            
+                }
+                else{
+                    enemy_select = enemy_len - 1;
+                }
+            }
+        }
+
+        if(fight_sel_state == 1){
+            if(c == 67){ // RIGHT - increment member_sel
+                team_sel++;
+            }
+            if(c == 68){ // LEFT - decrement member_sel
+                if(team_sel > 0){
+                    team_sel--;            
+                }
+                else{
+                    team_sel = team_sel - 1;
+                }
+            }
+        }
+        
+
+        if(c == 65){ // UP - increment fight_sel_state
+            if(fight_sel_state == 0){
+                fight_sel_state = 1;                
+            }
+            else{
+                fight_sel_state = 0;
+            }
+        }
+        if(c == 66){ // DOWN - decrement fight_sel_state
+            if(fight_sel_state == 0){
+                fight_sel_state = 1;                
+            }
+            else{
+                fight_sel_state = 0;
+            }
+        }
+
+        if(c == 'c'){
+            gamestate = 3;
+            last_state = 2;
+        }
+        else{
+            return 0;
+        }
+    }
+
+    if(gamestate == 3){
+        if(c == 'b'){
+            gamestate = last_state;
         }
         else{
             return 0;
@@ -247,6 +285,9 @@ int main(){
                 display_buy_menu(c, member_sel % MAX_TO_SCREEN, team_sel % MAX_MEMBERS, letter_map);
                 printf("c = %d\n", cur);
                 break; 
+            case 2:
+                display_fight_menu(enemy_select % enemy_len, team_sel % my_team.num_members);
+                break;
             case 3:
                 display_controls_menu();
                 break;
