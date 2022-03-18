@@ -74,7 +74,7 @@ void build_items(struct member *letter_map){
 
 }
 
-void display_buy_menu(int str, int select, int team_select, struct member *letter_map){
+void display_buy_menu(int str, int select, int team_select, struct member *letter_map, struct team my_team){
 
     // char *option_a = " a \t";
     // char *option_b = " b \t";
@@ -143,7 +143,7 @@ void display_buy_menu(int str, int select, int team_select, struct member *lette
         }
     }   
 
-    calc_team_power();
+    calc_team_power(my_team);
     
     strcat(out, "\033[K\033[0m");
     

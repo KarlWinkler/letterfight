@@ -14,20 +14,20 @@
 #include "structs.h"
 #include "random.h"
 
-
+struct team enemy_team;
 struct member enemy[5];
 int enemy_len = 0;
 
-void enemy_level(struct member *mem, int lvl){
-    mem->cost *= lvl;
-    mem->atk *= lvl;
-    mem->def *= lvl;
-    mem->dex *= lvl;
-    mem->crit *= lvl;
-    mem->level = lvl;
+void level_to(struct member mem, int lvl){
+    mem.cost *= lvl;
+    mem.atk *= lvl;
+    mem.def *= lvl;
+    mem.dex *= lvl;
+    mem.crit *= lvl;
+    mem.level = lvl;
 }
 
-void generate_enemy(struct member *letter_map){
+void generate_enemy(struct member *letter_map, struct team my_team){
     int total_cost = 0;
     int used[MAX_MEMBERS];
     int used_num = 0;
@@ -44,8 +44,8 @@ void generate_enemy(struct member *letter_map){
     used_num = 2;
     enemy_len = 2;
 
-    if(total_cost >= my_team.total_cost){
-        // printf("%d\n", enemy_len);
+    if(my_team.total_cost == 0 || total_cost >= my_team.total_cost){
+        printf("%d\n", my_team.total_cost);
         
         return;
     }
@@ -69,9 +69,15 @@ void generate_enemy(struct member *letter_map){
         enemy_len++;
         used_num++;
     }
+
+    while(total_cost < my_team.total_cost){
+        int rand_memb = random_int(enemy_len);
+        total_cost += enemy[rand_memb].cost;
+        level_to(enemy[rand_memb], enemy[rand_memb].level+1);
+    }
 }
 
-void display_fight_menu(int enemy_select, int  team_select){
+void display_fight_menu(int enemy_select, int  team_select, struct team my_team){
     CLEAR;
 
     // printf("%d\n", enemy_len);
@@ -116,7 +122,7 @@ void display_fight_menu(int enemy_select, int  team_select){
     printf("%s\n", enemy_out);
     printf("cost: %d\n\nattack: %d\ndeffence: %d\ndexterity: %d\ncrit chance: %d\n\n", enemy[enemy_select].cost, enemy[enemy_select].atk, enemy[enemy_select].def, enemy[enemy_select].dex, enemy[enemy_select].crit);
     printf("%s\n", team_out);
-    printf("cost: %d\n\nattack: %d\ndeffence: %d\ndexterity: %d\ncrit chance: %d\n", items[team_select].m.cost, items[team_select].m.atk, items[team_select].m.def, items[team_select].m.dex, items[team_select].m.crit);
+    printf("cost: %d\n\nattack: %d\ndeffence: %d\ndexterity: %d\ncrit chance: %d\n", my_team.members[team_select].cost, my_team.members[team_select].atk, my_team.members[team_select].def, my_team.members[team_select].dex, my_team.members[team_select].crit);
 
 
 }

@@ -24,6 +24,8 @@
 
 // variables required in main 
 struct member letter_map[ITEMS_LEN];
+struct team my_team;
+
 int gamestate = 0; // 0 = home; 1 = buy; 2 = fight; 3 = controls; 4 = stats?(maybe i will implement this)
 int last_state = 0;
 int member_sel = 0;
@@ -60,7 +62,7 @@ void generate_map(){
 
 void new_fight_state(){
     team_sel = 0;
-    generate_enemy(letter_map);
+    generate_enemy(letter_map, my_team);
 
 }
 
@@ -124,13 +126,13 @@ int handel_key_press(char c){
             }
         }
         if(c == 'p'){ // purchase
-            add_to_team(&items[member_sel % MAX_TO_SCREEN]);
+            add_to_team(&items[member_sel % MAX_TO_SCREEN], my_team);
         }
         if(c == 's'){ // sell 
-            sell_from_team(team_sel % MAX_MEMBERS);
+            sell_from_team(team_sel % MAX_MEMBERS, my_team);
         }
         if(c == 'u'){ // undo
-            undo_last();
+            undo_last(my_team);
         }
         if(c == 'c'){
             gamestate = 3;
@@ -219,7 +221,7 @@ void game_init(){
     // generate required data
     generate_map();
     build_items(letter_map);
-    team_init();
+    team_init(my_team);
 }
 
 // stuff for setting terminal to raw mode
@@ -273,8 +275,6 @@ int main(){
             break;
         }
 
-        usleep(10); // more sleep to save resources (idk if this one needs to be here)
-
         switch(gamestate){
             case 0:
                 display_home_menu();
@@ -282,11 +282,11 @@ int main(){
 
                 break;
             case 1:
-                display_buy_menu(c, member_sel % MAX_TO_SCREEN, team_sel % MAX_MEMBERS, letter_map);
+                display_buy_menu(c, member_sel % MAX_TO_SCREEN, team_sel % MAX_MEMBERS, letter_map, my_team);
                 printf("c = %d\n", cur);
                 break; 
             case 2:
-                display_fight_menu(enemy_select % enemy_len, team_sel % my_team.num_members);
+                display_fight_menu(enemy_select % enemy_len, team_sel % my_team.num_members, my_team);
                 break;
             case 3:
                 display_controls_menu();

@@ -9,12 +9,10 @@
 #include "structs.h"
 #include "macros.h"
 
-
-struct team my_team;
 struct history_item history[UNDO_BUFFER];
 int history_index = 0;
 
-void team_init(){
+void team_init(struct team my_team){
     my_team.total_cost = 0;
     my_team.offence = 0;
     my_team.defence = 0.0f;
@@ -60,7 +58,7 @@ void add_to_history(int type, struct member mem, int mem_inx, struct menu_item *
     history_index++;
 }
 
-void add_to_team(struct menu_item *toAdd){
+void add_to_team(struct menu_item *toAdd, struct team my_team){
     if((*toAdd).bought == 1){
         return;
     }
@@ -88,7 +86,7 @@ void add_to_team(struct menu_item *toAdd){
     }
 }
 
-void sell_from_team(int team_select){
+void sell_from_team(int team_select, struct team my_team){
     if(team_select >= my_team.num_members){
         return;
     }
@@ -105,7 +103,7 @@ void sell_from_team(int team_select){
     my_team.num_members --;
 }
 
-void undo_last(){
+void undo_last(struct team my_team){
     struct history_item h = history[history_index-1];
     if(history_index <= 0){
         return;
@@ -136,7 +134,7 @@ void undo_last(){
     }
 }
 
-void calc_team_power(){
+void calc_team_power(struct team my_team){
 
     my_team.offence = 0;
     my_team.defence = 0;

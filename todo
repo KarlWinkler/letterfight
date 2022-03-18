@@ -1,0 +1,20 @@
+implements
+- random buy menu
+- level-up for creating comparable enemy
+- combat
+	- use each teammember to atack chosen enemy
+	- only attack once
+	- can attack an enemy member more than once
+- extra stats
+	- dex/crit
+
+Refactor
+- make enemy a team? (current)
+- refactor enemy
+
+Rework 
+- rework defence as a counter to crit and add health
+
+bug fix
+- floating point exception on submit empty team
+- my_team values not equal for fight menu
