@@ -13,24 +13,16 @@
 #include "macros.h"
 #include "structs.h"
 #include "random.h"
+#include "team.c"
 
-struct team enemy_team;
 struct member enemy[5];
 int enemy_len = 0;
 
-void level_to(struct member mem, int lvl){
-    mem.cost *= lvl;
-    mem.atk *= lvl;
-    mem.def *= lvl;
-    mem.dex *= lvl;
-    mem.crit *= lvl;
-    mem.level = lvl;
-}
-
-void generate_enemy(struct member *letter_map, struct team my_team){
+void generate_enemy(struct team *enemy_team, struct member *letter_map, struct team *user_team){
     int total_cost = 0;
     int used[MAX_MEMBERS];
     int used_num = 0;
+    int target_cost = user_team->total_cost;
 
     int rand_one = random_int(ITEMS_LEN);
     int rand_two = 0;
@@ -44,12 +36,12 @@ void generate_enemy(struct member *letter_map, struct team my_team){
     used_num = 2;
     enemy_len = 2;
 
-    if(my_team.total_cost == 0 || total_cost >= my_team.total_cost){
-        printf("%d\n", my_team.total_cost);
+    if(target_cost == 0 || total_cost >= target_cost){
+        printf("%d\n", target_cost);
         
         return;
     }
-    while(total_cost < my_team.total_cost && enemy_len < MAX_MEMBERS){
+    while(total_cost < target_cost && enemy_len < MAX_MEMBERS){
 
         int rand = random_int(ITEMS_LEN);
         int duplicate = 0;
@@ -70,14 +62,20 @@ void generate_enemy(struct member *letter_map, struct team my_team){
         used_num++;
     }
 
-    while(total_cost < my_team.total_cost){
+    while(total_cost < target_cost){
         int rand_memb = random_int(enemy_len);
         total_cost += enemy[rand_memb].cost;
-        level_to(enemy[rand_memb], enemy[rand_memb].level+1);
+        level_up(enemy[rand_memb]);
     }
+
+    enemy_team->total_cost = total_cost;
+    for(int i = 0; i < enemy_len; i++){
+        enemy_team->members[i] = enemy[i];
+    }
+    calc_team_power(enemy_team);
 }
 
-void display_fight_menu(int enemy_select, int  team_select, struct team my_team){
+void display_fight_menu(int enemy_select, int  team_select, struct team my_team, struct team enemy_team){
     CLEAR;
 
     // printf("%d\n", enemy_len);
@@ -120,7 +118,7 @@ void display_fight_menu(int enemy_select, int  team_select, struct team my_team)
 
     } 
     printf("%s\n", enemy_out);
-    printf("cost: %d\n\nattack: %d\ndeffence: %d\ndexterity: %d\ncrit chance: %d\n\n", enemy[enemy_select].cost, enemy[enemy_select].atk, enemy[enemy_select].def, enemy[enemy_select].dex, enemy[enemy_select].crit);
+    printf("cost: %d\n\nattack: %d\ndeffence: %d\ndexterity: %d\ncrit chance: %d\n\n", enemy_team.members[enemy_select].cost, enemy_team.members[enemy_select].atk, enemy_team.members[enemy_select].def, enemy_team.members[enemy_select].dex, enemy_team.members[enemy_select].crit);
     printf("%s\n", team_out);
     printf("cost: %d\n\nattack: %d\ndeffence: %d\ndexterity: %d\ncrit chance: %d\n", my_team.members[team_select].cost, my_team.members[team_select].atk, my_team.members[team_select].def, my_team.members[team_select].dex, my_team.members[team_select].crit);
 

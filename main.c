@@ -25,6 +25,7 @@
 // variables required in main 
 struct member letter_map[ITEMS_LEN];
 struct team my_team;
+struct team enemy_team;
 
 int gamestate = 0; // 0 = home; 1 = buy; 2 = fight; 3 = controls; 4 = stats?(maybe i will implement this)
 int last_state = 0;
@@ -60,9 +61,70 @@ void generate_map(){
     }
 }
 
+struct menu_item items[ITEMS_LEN];
+// struct menu_item transact[MAX_MEMBERS];
+// int trans_size = 0;
+
+
+void build_items(struct member *letter_map){
+
+    for(int i = 0; i < ITEMS_LEN; i++){
+        items[i].m = letter_map[i];
+        char temp[10000];
+
+        char n[2];
+
+        n[0] = letter_map[i].name;
+        n[1] = '\0';
+
+        // normal
+        
+        strcat(temp, " ");
+        strcat(temp, n);
+        strcat(temp, " \t");
+
+        strcpy(items[i].title, temp);
+
+        bzero(temp, sizeof(temp));
+
+        // select
+
+        strcat(temp, "\033[44m ");
+        strcat(temp, n);
+        strcat(temp, " \t\033[47m");
+
+        strcpy(items[i].title_select, temp);
+        
+        bzero(temp, sizeof(temp));
+
+        //bought
+
+        strcat(temp, "\033[40m\033[37m ");
+        strcat(temp, n);
+        strcat(temp, " \t\033[47m\033[30m");
+
+        strcpy(items[i].disabled, temp);
+        
+        bzero(temp, sizeof(temp));
+
+        // bought selected
+
+        strcat(temp, "\033[40m\033[31m ");
+        strcat(temp, n);
+        strcat(temp, " \t\033[47m\033[30m");
+
+        strcpy(items[i].disabled_selected, temp);
+        
+        bzero(temp, sizeof(temp));
+
+        items[i].bought = 0;
+    }
+
+}
+
 void new_fight_state(){
     team_sel = 0;
-    generate_enemy(letter_map, my_team);
+    generate_enemy(&enemy_team, letter_map, &my_team);
 
 }
 
@@ -126,13 +188,13 @@ int handel_key_press(char c){
             }
         }
         if(c == 'p'){ // purchase
-            add_to_team(&items[member_sel % MAX_TO_SCREEN], my_team);
+            add_to_team(&items[member_sel % MAX_TO_SCREEN], &my_team);
         }
         if(c == 's'){ // sell 
-            sell_from_team(team_sel % MAX_MEMBERS, my_team);
+            sell_from_team(team_sel % MAX_MEMBERS, &my_team);
         }
         if(c == 'u'){ // undo
-            undo_last(my_team);
+            undo_last(&my_team);
         }
         if(c == 'c'){
             gamestate = 3;
@@ -171,7 +233,7 @@ int handel_key_press(char c){
                     team_sel--;            
                 }
                 else{
-                    team_sel = team_sel - 1;
+                    team_sel = my_team.num_members - 1;
                 }
             }
         }
@@ -221,7 +283,7 @@ void game_init(){
     // generate required data
     generate_map();
     build_items(letter_map);
-    team_init(my_team);
+    team_init(&my_team);
 }
 
 // stuff for setting terminal to raw mode
@@ -282,11 +344,11 @@ int main(){
 
                 break;
             case 1:
-                display_buy_menu(c, member_sel % MAX_TO_SCREEN, team_sel % MAX_MEMBERS, letter_map, my_team);
+                display_buy_menu(c, member_sel % MAX_TO_SCREEN, team_sel % MAX_MEMBERS, letter_map, items, &my_team);
                 printf("c = %d\n", cur);
                 break; 
             case 2:
-                display_fight_menu(enemy_select % enemy_len, team_sel % my_team.num_members, my_team);
+                display_fight_menu(enemy_select % enemy_len, team_sel % my_team.num_members, my_team, enemy_team);
                 break;
             case 3:
                 display_controls_menu();
