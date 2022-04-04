@@ -15,65 +15,8 @@
 #include "random.h"
 #include "team.c"
 
-struct member enemy[5];
-int enemy_len = 0;
-
-void generate_enemy(struct team *enemy_team, struct member *letter_map, struct team *user_team){
-    int total_cost = 0;
-    int used[MAX_MEMBERS];
-    int used_num = 0;
-    int target_cost = user_team->total_cost;
-
-    int rand_one = random_int(ITEMS_LEN);
-    int rand_two = 0;
-    while((rand_two = random_int(ITEMS_LEN)) == rand_one){}
-
-    total_cost = letter_map[rand_one].cost + letter_map[rand_two].cost;
-    used[0] = rand_one;
-    used[1] = rand_two;
-    enemy[0] = letter_map[rand_one];
-    enemy[1] = letter_map[rand_two];
-    used_num = 2;
-    enemy_len = 2;
-
-    if(target_cost == 0 || total_cost >= target_cost){
-        printf("%d\n", target_cost);
-        
-        return;
-    }
-    while(total_cost < target_cost && enemy_len < MAX_MEMBERS){
-
-        int rand = random_int(ITEMS_LEN);
-        int duplicate = 0;
-
-        for(int i = 0; i < used_num; i++){
-            if(used[i] == rand){
-                duplicate = 1;
-            }  
-        }
-        if(duplicate){
-            continue;
-        }
-
-        used[used_num] = rand;
-        enemy[enemy_len] = letter_map[rand];
-        total_cost += enemy[enemy_len].cost;
-        enemy_len++;
-        used_num++;
-    }
-
-    while(total_cost < target_cost){
-        int rand_memb = random_int(enemy_len);
-        total_cost += enemy[rand_memb].cost;
-        level_up(enemy[rand_memb]);
-    }
-
-    enemy_team->total_cost = total_cost;
-    for(int i = 0; i < enemy_len; i++){
-        enemy_team->members[i] = enemy[i];
-    }
-    calc_team_power(enemy_team);
-}
+// my_team is the current players team
+// enemy is their opponent
 
 void display_fight_menu(int enemy_select, int  team_select, struct team my_team, struct team enemy_team){
     CLEAR;
@@ -82,9 +25,9 @@ void display_fight_menu(int enemy_select, int  team_select, struct team my_team,
     char enemy_out[1024];
     bzero(enemy_out, sizeof(enemy_out));
 
-    for(int i = 0; i < enemy_len; i++){
+    for(int i = 0; i < enemy_team.num_members; i++){
         char n[4];
-        n[0] = enemy[i].name;
+        n[0] = enemy_team.members->me.name;
         n[1] = '\0';
         // strcat(enemy_out, n);
         if(i == enemy_select){
@@ -104,7 +47,7 @@ void display_fight_menu(int enemy_select, int  team_select, struct team my_team,
         
         char n[2];
 
-        n[0] = my_team.members[i].name;
+        n[0] = my_team.members[i].me.name;
         n[1] = '\0';
 
         if(i == team_select){
@@ -118,9 +61,9 @@ void display_fight_menu(int enemy_select, int  team_select, struct team my_team,
 
     } 
     printf("%s\n", enemy_out);
-    printf("cost: %d\n\nattack: %d\ndeffence: %d\ndexterity: %d\ncrit chance: %d\n\n", enemy_team.members[enemy_select].cost, enemy_team.members[enemy_select].atk, enemy_team.members[enemy_select].def, enemy_team.members[enemy_select].dex, enemy_team.members[enemy_select].crit);
+    printf("cost: %d\n\nattack: %d\ndeffence: %d\ndexterity: %d\ncrit chance: %d\n\n", enemy_team.members[enemy_select].me.cost, enemy_team.members[enemy_select].me.atk, enemy_team.members[enemy_select].me.def, enemy_team.members[enemy_select].me.dex, enemy_team.members[enemy_select].me.crit);
     printf("%s\n", team_out);
-    printf("cost: %d\n\nattack: %d\ndeffence: %d\ndexterity: %d\ncrit chance: %d\n", my_team.members[team_select].cost, my_team.members[team_select].atk, my_team.members[team_select].def, my_team.members[team_select].dex, my_team.members[team_select].crit);
-
+    printf("cost: %d\n\nattack: %d\ndeffence: %d\ndexterity: %d\ncrit chance: %d\n", my_team.members[team_select].me.cost, my_team.members[team_select].me.atk, my_team.members[team_select].me.def, my_team.members[team_select].me.dex, my_team.members[team_select].me.crit);
+    printf("%d\n", enemy_team.total_cost);
 
 }

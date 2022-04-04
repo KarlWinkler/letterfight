@@ -60,7 +60,7 @@ void display_buy_menu(int str, int select, int team_select, struct member *lette
         if(i < my_team->num_members){
             char n[2];
 
-            n[0] = my_team->members[i].name;
+            n[0] = my_team->members[i].me.name;
             n[1] = '\0';
 
             if(i == team_select){
@@ -87,17 +87,15 @@ void display_buy_menu(int str, int select, int team_select, struct member *lette
     strcat(out, "\033[K\033[0m");
     
     CLEAR;
-    printf("%s", out);
-    printf("\ncost: %d\n\nattack: %d\ndeffence: %d\ndexterity: %d\ncrit chance: %d\n\nMy Team:\n%s\n", items[select].m.cost, items[select].m.atk, items[select].m.def, items[select].m.dex, items[select].m.crit, team_out);
+    printf("%s\n", out);
+    printf("cost: %d\n\nhealth: %d\nattack: %d\ndeffence: %d\ndexterity: %d\ncrit chance: %d\n\nMy Team:\n%s\n", items[select].m.cost, items[select].m.health, items[select].m.atk, items[select].m.def, items[select].m.dex, items[select].m.crit, team_out);
     printf("Cost: %d\n", my_team->total_cost);
     printf("Offence: %f\nDefence: %f\nDexterity: %f\nCritical Strike: %f\n", my_team->offence, my_team->defence, my_team->dexterity, my_team->crit);
 
     printf("Team_select: %d\n", team_select);
-
     
     bzero(out, sizeof(out));
     bzero(team_out, sizeof(team_out));
-
 
     // printf("\r\033[47m\033[30m%s%s%s\033[K\033[0m", option_a, option_b, option_c);
     // printf("\r\033[47m\033[30m%s%s%s\033[K\033[0m", option_a_selected, option_b, option_c);

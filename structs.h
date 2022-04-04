@@ -9,12 +9,18 @@
 
 struct member{
     char name;
+    int health;
     int atk;
     int def;
     int dex;
     int crit;
     int cost;
     int level;
+};
+
+struct team_member{
+    struct member me;
+    int cur_hp;
 };
 
 struct menu_item{
@@ -31,11 +37,10 @@ struct history_item{
     struct member mem;
     int mem_inx;
     int type; // 0 = buy; 1 = delete, 2 = level_up; 
-
 };
 
 struct team{
-    struct member members[24];
+    struct team_member members[24];
     int num_members;
     int health;
     int balance;

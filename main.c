@@ -24,8 +24,8 @@
 
 // variables required in main 
 struct member letter_map[ITEMS_LEN];
-struct team my_team;
-struct team enemy_team;
+struct team team_one;
+struct team team_two;
 
 int gamestate = 0; // 0 = home; 1 = buy; 2 = fight; 3 = controls; 4 = stats?(maybe i will implement this)
 int last_state = 0;
@@ -35,6 +35,8 @@ int enemy_select = 0;
 int fight_sel_state = 0;
 char c = 0;
 char old_c = 1;
+int turn = 0;
+int gamephase = 0; // represents which teams turn it is (0 or 1)
 
 // generates the new members to play the game
 // this is called once at the start of a game
@@ -48,7 +50,8 @@ void generate_map(){
 
         new.name = i;
         new.cost = strength_roll;
-        new.atk = (int)(strength_roll*(random_int(100)*0.01) + 1); // multiply by decimal
+        new.health = (int)(strength_roll*(random_int(100)*0.01) + 1); // multiply by decimal
+        new.atk = (int)(strength_roll*(random_int(100)*0.01) + 1);
         new.def = (int)(strength_roll*(random_int(100)*0.01) + 1);
         new.dex = (int)(strength_roll*(random_int(100)*0.01) + 1);
         new.crit = (int)(strength_roll*(random_int(100)*0.01) + 1);
@@ -122,22 +125,37 @@ void build_items(struct member *letter_map){
 
 }
 
-void new_fight_state(){
+void new_fight_state(struct team *enemy_team, struct team *my_team){
     team_sel = 0;
-    generate_enemy(&enemy_team, letter_map, &my_team);
+    // generate_enemy(&enemy_team, letter_map, &my_team);
+}
 
+// iniit gamedata
+void game_init(){
+
+    // generate required data
+    generate_map();
+    build_items(letter_map);
+    team_init(&team_one);
+    team_init(&team_two);
+
+}
+
+void end_turn(){
+    turn++;
+    gamestate = 1;
 }
 
 // takes a char 
 // returns a response code
 // 0 == OK; 1 == exit;
-int handel_key_press(char c){
+int handel_key_press(char c, struct team *my_team, struct team *enemy_team){
 
     // global hot keys
     
     // ` => quit game (maybe ESC should as well) 
 
-    // quit the program
+    // quit the programs
     if(c == '`'){ 
         return 1;
     }
@@ -188,21 +206,28 @@ int handel_key_press(char c){
             }
         }
         if(c == 'p'){ // purchase
-            add_to_team(&items[member_sel % MAX_TO_SCREEN], &my_team);
+            add_to_team(&items[member_sel % MAX_TO_SCREEN], my_team);
         }
         if(c == 's'){ // sell 
-            sell_from_team(team_sel % MAX_MEMBERS, &my_team);
+            sell_from_team(team_sel % MAX_MEMBERS, my_team);
         }
         if(c == 'u'){ // undo
-            undo_last(&my_team);
+            undo_last(my_team);
         }
         if(c == 'c'){
             gamestate = 3;
             last_state = 1;
         }
-        if(c == 10){ // ENTER moves to fight phase
-            gamestate = 2;
-            new_fight_state();
+        if(c == 10){ // ENTER moves to next phase
+            if(gamephase == 0){
+                gamephase = 2;
+            }
+            else{
+                gamestate = 2;
+                gamephase = 1;
+                new_fight_state(my_team, enemy_team);
+            }
+            
         }
         else{
             return 0;
@@ -219,7 +244,7 @@ int handel_key_press(char c){
                     enemy_select--;            
                 }
                 else{
-                    enemy_select = enemy_len - 1;
+                    enemy_select = enemy_team->num_members - 1;
                 }
             }
         }
@@ -233,7 +258,7 @@ int handel_key_press(char c){
                     team_sel--;            
                 }
                 else{
-                    team_sel = my_team.num_members - 1;
+                    team_sel = my_team->num_members - 1;
                 }
             }
         }
@@ -275,15 +300,6 @@ int handel_key_press(char c){
     }
 
     return 0;
-}
-
-// iniit gamedata
-void game_init(){
-
-    // generate required data
-    generate_map();
-    build_items(letter_map);
-    team_init(&my_team);
 }
 
 // stuff for setting terminal to raw mode
@@ -331,9 +347,21 @@ int main(){
              usleep(100); // so that it is not too memory intensive (still not great I think)
         }
 
-        old_c = c; // so that above works
+        struct team *curr_team;
+        struct team *opp_team;
 
-        if((c = handel_key_press(c))){ // handel key press 0 == OK; 1 == exit;
+        if(gamephase == 0){
+            curr_team = &team_one;
+            opp_team = &team_two;
+        }
+        else{
+            curr_team = &team_two;
+            opp_team = &team_one;
+        }
+
+        old_c = c; // so that above works
+        
+        if((c = handel_key_press(c, curr_team, opp_team))){ // handel key press 0 == OK; 1 == exit;
             break;
         }
 
@@ -344,11 +372,11 @@ int main(){
 
                 break;
             case 1:
-                display_buy_menu(c, member_sel % MAX_TO_SCREEN, team_sel % MAX_MEMBERS, letter_map, items, &my_team);
-                printf("c = %d\n", cur);
+                display_buy_menu(c, member_sel % MAX_TO_SCREEN, team_sel % MAX_MEMBERS, letter_map, items, curr_team);
+                //printf("c = %d\n", cur);
                 break; 
             case 2:
-                display_fight_menu(enemy_select % enemy_len, team_sel % my_team.num_members, my_team, enemy_team);
+                display_fight_menu(enemy_select % opp_team->num_members, team_sel % (*curr_team).num_members, *curr_team, *opp_team);
                 break;
             case 3:
                 display_controls_menu();

@@ -1,4 +1,6 @@
 implements
+- figure out and implement fight mechanics
+- convert to multiplayer rather than vs AI
 - random buy menu
 - level-up for creating comparable enemy
 - combat
@@ -18,3 +20,8 @@ Rework
 bug fix
 - floating point exception on submit empty team
 - my_team values not equal for fight menu
+
+
+CHALLENGES
+- implement "AI"
+- make multiplayer LAN/server based (TCP/IP)

@@ -25,14 +25,14 @@ void team_init(struct team *my_team){
     my_team->balance = 0;
 }
 
-void level_up(struct member m){
-    float level = m.level;
-    m.cost += m.cost / level;
-    m.atk += m.atk / level;
-    m.def += m.def / level;
-    m.dex += m.dex / level;
-    m.crit += m.crit / level;
-    m.level++;
+void level_up(struct member *m){
+    float level = m->level;
+    m->cost += m->cost / level;
+    m->atk += m->atk / level;
+    m->def += m->def / level;
+    m->dex += m->dex / level;
+    m->crit += m->crit / level;
+    m->level++;
 }
 
 void level_to(struct member mem, int lvl){
@@ -44,9 +44,9 @@ void level_to(struct member mem, int lvl){
     mem.level = lvl;
 }
 
-int check_duplicate(struct member m, struct member *mem_list, int len){
+int check_duplicate(struct member m, struct team_member *mem_list, int len){
     for(int i = 0; i < len; i++){
-        if(m.name == mem_list[i].name){
+        if(m.name == mem_list[i].me.name){
             return i;
         }
     }
@@ -78,13 +78,14 @@ void add_to_team(struct menu_item *toAdd, struct team *my_team){
         int inx = 0;
 
         if((inx = check_duplicate(toAdd->m, my_team->members, my_team->num_members)) >= 0){
-            level_up(my_team->members[inx]);
+            level_up(&my_team->members[inx].me);
+            my_team->members[inx].cur_hp = my_team->members[inx].me.health;
             struct menu_item empty;
-            add_to_history(2, my_team->members[inx], inx, &empty);
+            add_to_history(2, my_team->members[inx].me, inx, &empty);
             return;
         }
 
-        my_team->members[my_team->num_members] = (*toAdd).m;
+        my_team->members[my_team->num_members].me = (*toAdd).m;
         my_team->num_members ++;
         if(my_team->num_members == 1){
             my_team->total_cost = 0;
@@ -105,9 +106,9 @@ void sell_from_team(int team_select, struct team *my_team){
     // remove cost
 
     struct menu_item empty;
-    add_to_history(1, my_team->members[team_select], team_select, &empty);
+    add_to_history(1, my_team->members[team_select].me, team_select, &empty);
 
-    my_team->total_cost -= my_team->members[team_select].cost;
+    my_team->total_cost -= my_team->members[team_select].me.cost;
     for(int i = team_select; i < my_team->num_members; i++){
         my_team->members[i] = my_team->members[i+1];
     }
@@ -129,7 +130,7 @@ void undo_last(struct team *my_team){
         for(int i = my_team->num_members; i > h.mem_inx; i--){
             my_team->members[i] = my_team->members[i-1];
         }
-        my_team->members[h.mem_inx] = h.mem;
+        my_team->members[h.mem_inx].me = h.mem;
         my_team->num_members++;
         my_team->total_cost += h.mem.cost;
         history_index--;
@@ -153,10 +154,10 @@ void calc_team_power(struct team *my_team){
     my_team->crit = 0;
 
     for(int i = 0; i < my_team->num_members; i++){
-        my_team->offence += my_team->members[i].atk;
-        my_team->defence += my_team->members[i].def;
-        my_team->dexterity += my_team->members[i].dex;
-        my_team->crit += my_team->members[i].crit;
+        my_team->offence += my_team->members[i].me.atk;
+        my_team->defence += my_team->members[i].me.def;
+        my_team->dexterity += my_team->members[i].me.dex;
+        my_team->crit += my_team->members[i].me.crit;
 
     }
     my_team->defence = my_team->defence / my_team->total_cost;
