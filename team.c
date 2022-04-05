@@ -86,6 +86,7 @@ void add_to_team(struct menu_item *toAdd, struct team *my_team){
         }
 
         my_team->members[my_team->num_members].me = (*toAdd).m;
+        my_team->members[my_team->num_members].cur_hp = (*toAdd).m.health;
         my_team->num_members ++;
         if(my_team->num_members == 1){
             my_team->total_cost = 0;

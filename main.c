@@ -233,7 +233,13 @@ int handel_key_press(char c, struct team *my_team, struct team *enemy_team){
             return 0;
         }
     }
+    // fight mode hotkeys
+    // UP => toggle team selected
+    // DOWN => toggle team selected
+    // LEFT => decrement select of the selected team
+    // RIGHT => increment select of the selected team
 
+    // a => make attack
     if(gamestate == 2){
         if(fight_sel_state == 0){
             if(c == 67){ // RIGHT - increment member_sel
@@ -262,8 +268,13 @@ int handel_key_press(char c, struct team *my_team, struct team *enemy_team){
                 }
             }
         }
-        
 
+        if(c == 'a'){
+            make_attack(my_team, enemy_team, team_sel, enemy_select);
+            gamephase++;
+            gamephase = gamephase % 2;
+        }
+        
         if(c == 65){ // UP - increment fight_sel_state
             if(fight_sel_state == 0){
                 fight_sel_state = 1;                
@@ -290,6 +301,8 @@ int handel_key_press(char c, struct team *my_team, struct team *enemy_team){
         }
     }
 
+    //controls guide 
+
     if(gamestate == 3){
         if(c == 'b'){
             gamestate = last_state;
@@ -308,7 +321,6 @@ struct termios new_term_attr;
 
 int main(){
 
-    char cur = 0;
     //clear game board and hide cursor
     CLEAR;
     printf("\e[?25l"); // https://stackoverflow.com/questions/30126490/how-to-hide-console-cursor-in-c
@@ -343,7 +355,6 @@ int main(){
         // after the user presses it        
         while(c == old_c){
              read(0, &c, 1); // read user input
-             cur = c;
              usleep(100); // so that it is not too memory intensive (still not great I think)
         }
 
